@@ -2,6 +2,7 @@
 use crate::{IntoRawIndexedAccess, RawIndexedAccess};
 use std::marker::PhantomData;
 
+#[derive(Debug)]
 pub struct RawSliceAccess<'a, T> {
     ptr: *mut T,
     len: usize,
