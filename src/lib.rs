@@ -1,6 +1,9 @@
 
 pub mod slice;
 
+#[cfg(feature = "rayon")]
+pub mod rayon;
+
 /// Facilitates unsynchronized access to (mutable) records stored in the collection.
 ///
 /// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
@@ -23,9 +26,14 @@ pub mod slice;
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait RawIndexedAccess: Sync + Send + Clone {
+pub unsafe trait RawIndexedAccess: Sync + Send {
     type Record;
     type RecordMut;
+
+    // TODO: Should this be unsafe instead of using `Clone`? I think so, because otherwise
+    // we might obtain an access using safe code, then clone it several times and pass
+    // it off to methods that might eventually try to access the same entries
+    unsafe fn clone_access(&self) -> Self;
 
     unsafe fn get_raw(&self, index: usize) -> Self::Record;
     unsafe fn get_raw_mut(&self, index: usize) -> Self::RecordMut;
