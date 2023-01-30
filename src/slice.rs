@@ -15,6 +15,7 @@ unsafe impl<'a, T: Sync + Send> RawIndexedAccess for RawSliceAccess<'a, T>
     type Record = &'a T;
     type RecordMut = &'a mut T;
 
+    #[inline(always)]
     unsafe fn clone_access(&self) -> Self {
         Self {
             ptr: self.ptr,
@@ -23,10 +24,12 @@ unsafe impl<'a, T: Sync + Send> RawIndexedAccess for RawSliceAccess<'a, T>
         }
     }
 
+    #[inline(always)]
     unsafe fn get_raw(&self, global_index: usize) -> Self::Record {
         &*self.ptr.add(global_index)
     }
 
+    #[inline(always)]
     unsafe fn get_raw_mut(&self, global_index: usize) -> Self::RecordMut {
         &mut *self.ptr.add(global_index)
     }

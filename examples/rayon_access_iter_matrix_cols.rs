@@ -30,6 +30,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
     type Record = DVectorView<'a, T>;
     type RecordMut = DVectorViewMut<'a, T>;
 
+    #[inline(always)]
     unsafe fn clone_access(&self) -> Self {
         Self {
             ptr: self.ptr,
@@ -39,6 +40,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
         }
     }
 
+    #[inline(always)]
     unsafe fn get_raw(&self, index: usize) -> Self::Record {
         let offset = index * self.rows;
         let len = self.rows;
@@ -48,6 +50,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
         }
     }
 
+    #[inline(always)]
     unsafe fn get_raw_mut(&self, index: usize) -> Self::RecordMut {
         let offset = index * self.rows;
         let len = self.rows;
