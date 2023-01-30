@@ -1,4 +1,4 @@
-use crate::{RawIndexedAccess, IntoRawIndexedAccess};
+use crate::{IntoRawIndexedAccess, RawIndexedAccess};
 use std::marker::PhantomData;
 
 pub struct RawSliceAccess<'a, T> {
@@ -10,8 +10,7 @@ pub struct RawSliceAccess<'a, T> {
 unsafe impl<'a, T: Sync> Sync for RawSliceAccess<'a, T> {}
 unsafe impl<'a, T: Send> Send for RawSliceAccess<'a, T> {}
 
-unsafe impl<'a, T: Sync + Send> RawIndexedAccess for RawSliceAccess<'a, T>
-{
+unsafe impl<'a, T: Sync + Send> RawIndexedAccess for RawSliceAccess<'a, T> {
     type Record = &'a T;
     type RecordMut = &'a mut T;
 
@@ -20,7 +19,7 @@ unsafe impl<'a, T: Sync + Send> RawIndexedAccess for RawSliceAccess<'a, T>
         Self {
             ptr: self.ptr,
             len: self.len,
-            marker: Default::default()
+            marker: Default::default(),
         }
     }
 

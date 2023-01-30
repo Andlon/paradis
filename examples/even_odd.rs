@@ -11,9 +11,21 @@ fn par_even_odd(numbers: &mut [i32]) {
 
     scope(|s| {
         // Transform the even numbers
-        s.spawn(|| { for i in (0 .. n).step_by(2) { unsafe { *access.get_raw_mut(i) *= 2; } } });
+        s.spawn(|| {
+            for i in (0..n).step_by(2) {
+                unsafe {
+                    *access.get_raw_mut(i) *= 2;
+                }
+            }
+        });
         // Transform the odd numbers
-        s.spawn(|| { for i in (1 .. n).step_by(2) { unsafe { *access.get_raw_mut(i) *= 4; } } });
+        s.spawn(|| {
+            for i in (1..n).step_by(2) {
+                unsafe {
+                    *access.get_raw_mut(i) *= 4;
+                }
+            }
+        });
     });
 }
 

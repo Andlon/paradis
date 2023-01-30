@@ -1,8 +1,8 @@
-use std::marker::PhantomData;
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
-use rayon::iter::ParallelIterator;
-use paradis::RawIndexedAccess;
 use paradis::rayon::par_iter_from_access;
+use paradis::RawIndexedAccess;
+use rayon::iter::ParallelIterator;
+use std::marker::PhantomData;
 
 /// Facilitates (parallel) raw access to columns of a DMatrix
 pub struct DMatrixColRawAccess<'a, T> {
@@ -36,7 +36,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
             ptr: self.ptr,
             rows: self.rows,
             cols: self.cols,
-            marker: Default::default()
+            marker: Default::default(),
         }
     }
 
@@ -70,12 +70,11 @@ fn main() {
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
 
-    par_iter_from_access(DMatrixColRawAccess::from_matrix_mut(&mut matrix))
-        .for_each(|mut col| {
-            assert_eq!(col.nrows(), m);
-            assert_eq!(col.ncols(), 1);
-            col *= 2.0;
-        });
+    par_iter_from_access(DMatrixColRawAccess::from_matrix_mut(&mut matrix)).for_each(|mut col| {
+        assert_eq!(col.nrows(), m);
+        assert_eq!(col.ncols(), 1);
+        col *= 2.0;
+    });
 
     assert!(matrix.iter().all(|&x| x == 4.0));
 }

@@ -17,15 +17,19 @@ fn par_even_odd(numbers: &mut [i32]) {
         s.spawn(|| {
             let ptr = ptr;
             // Transform the even numbers
-            for i in (0 .. n).step_by(2) {
-                unsafe { *ptr.0.add(i) *= 2; }
+            for i in (0..n).step_by(2) {
+                unsafe {
+                    *ptr.0.add(i) *= 2;
+                }
             }
         });
         s.spawn(|| {
             let ptr = ptr;
             // Transform the odd numbers
-            for i in (1 .. n).step_by(2) {
-                unsafe { *ptr.0.add(i) *= 4; }
+            for i in (1..n).step_by(2) {
+                unsafe {
+                    *ptr.0.add(i) *= 4;
+                }
             }
         });
     });

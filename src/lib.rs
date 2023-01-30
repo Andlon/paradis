@@ -1,4 +1,3 @@
-
 pub mod slice;
 
 #[cfg(feature = "rayon")]

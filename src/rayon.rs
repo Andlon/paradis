@@ -1,6 +1,6 @@
-use rayon::iter::{ParallelIterator, IndexedParallelIterator};
-use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use crate::RawIndexedAccess;
+use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
+use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
 pub struct ParIterFromAccess<Access>(pub Access);
 
@@ -14,8 +14,7 @@ struct AccessProducerMut<Access> {
     end_idx: usize,
 }
 
-impl<Access: RawIndexedAccess> Iterator for AccessProducerMut<Access>
-{
+impl<Access: RawIndexedAccess> Iterator for AccessProducerMut<Access> {
     type Item = Access::RecordMut;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -45,7 +44,7 @@ impl<Access: RawIndexedAccess> DoubleEndedIterator for AccessProducerMut<Access>
 
 impl<Access> Producer for AccessProducerMut<Access>
 where
-    Access: RawIndexedAccess
+    Access: RawIndexedAccess,
 {
     type Item = Access::RecordMut;
     type IntoIter = Self;
@@ -54,7 +53,7 @@ where
         AccessProducerMut {
             access: self.access,
             start_idx: self.start_idx,
-            end_idx: self.end_idx
+            end_idx: self.end_idx,
         }
     }
 
@@ -79,13 +78,14 @@ where
 impl<Access> ParallelIterator for ParIterFromAccess<Access>
 where
     Access: RawIndexedAccess,
-    Access::RecordMut: Send
+    Access::RecordMut: Send,
 {
     type Item = Access::RecordMut;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: UnindexedConsumer<Self::Item> {
+        C: UnindexedConsumer<Self::Item>,
+    {
         bridge(self, consumer)
     }
 
@@ -112,8 +112,7 @@ where
         callback.callback(AccessProducerMut {
             start_idx: 0,
             end_idx: access.len(),
-            access
+            access,
         })
     }
 }
-
