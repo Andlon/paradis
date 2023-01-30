@@ -1,11 +1,21 @@
-use crate::RawIndexedAccess;
+use crate::{IntoRawIndexedAccess, RawIndexedAccess};
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
-pub struct ParIterFromAccess<Access>(pub Access);
+#[derive(Debug)]
+pub struct RawAccessParIter<Access>(Access);
 
-pub fn par_iter_from_access<Access>(access: Access) -> ParIterFromAccess<Access> {
-    ParIterFromAccess(access)
+impl<Access> RawAccessParIter<Access> {
+    pub fn from_access(into_access: impl IntoRawIndexedAccess<Access = Access>) -> Self {
+        let access = into_access.into_raw_indexed_access();
+        Self(access)
+    }
+}
+
+pub fn par_iter_from_access<Access>(
+    access: impl IntoRawIndexedAccess<Access = Access>,
+) -> RawAccessParIter<Access> {
+    RawAccessParIter::from_access(access)
 }
 
 struct AccessProducerMut<Access> {
@@ -75,7 +85,7 @@ where
     }
 }
 
-impl<Access> ParallelIterator for ParIterFromAccess<Access>
+impl<Access> ParallelIterator for RawAccessParIter<Access>
 where
     Access: RawIndexedAccess,
     Access::RecordMut: Send,
@@ -94,7 +104,7 @@ where
     }
 }
 
-impl<Access> IndexedParallelIterator for ParIterFromAccess<Access>
+impl<Access> IndexedParallelIterator for RawAccessParIter<Access>
 where
     Access: RawIndexedAccess,
     Access::RecordMut: Send,

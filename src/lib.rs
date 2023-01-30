@@ -44,3 +44,11 @@ pub trait IntoRawIndexedAccess {
 
     fn into_raw_indexed_access(self) -> Self::Access;
 }
+
+impl<Access: RawIndexedAccess> IntoRawIndexedAccess for Access {
+    type Access = Self;
+
+    fn into_raw_indexed_access(self) -> Self::Access {
+        self
+    }
+}
