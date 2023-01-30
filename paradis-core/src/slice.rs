@@ -1,3 +1,4 @@
+//! Core primitives for slices.
 use crate::{IntoRawIndexedAccess, RawIndexedAccess};
 use std::marker::PhantomData;
 

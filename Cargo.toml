@@ -6,6 +6,10 @@ edition = "2021"
 [features]
 rayon = [ "dep:rayon" ]
 
+[dependencies]
+paradis-core = { version = "0.1", path = "paradis-core" }
+rayon = { version = "1.6.1", optional = true }
+
 [[example]]
 name = "rayon_access_iter_slice"
 required-features = [ "rayon" ]
@@ -14,10 +18,10 @@ required-features = [ "rayon" ]
 name = "rayon_access_iter_matrix_cols"
 required-features = [ "rayon" ]
 
-[dependencies]
-rayon = { version = "1.6.1", optional = true }
-
 [dev-dependencies]
 ## Used for some examples. TODO: Ideally this would be optional, but it doesn't look
 ## like this is possible?
 nalgebra = { version = "0.32.1" }
+
+[workspace]
+members = [ "paradis-core" ]
