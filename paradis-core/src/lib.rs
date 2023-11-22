@@ -11,8 +11,8 @@ pub mod slice;
 /// Facilitates unsynchronized access to (mutable) records stored in the collection.
 ///
 /// The trait provides *unsynchronized* access to (possibly mutable) *records*, defined by the
-/// associated types [`Record`][`RawIndexedAccess::Record`] and
-/// [`RecordMut`][`RawIndexedAccess::RecordMut`].
+/// associated types [`Record`][`UnsyncAccess::Record`] and
+/// [`RecordMut`][`UnsyncAccess::RecordMut`].
 ///
 /// # Safety
 ///
@@ -30,7 +30,7 @@ pub mod slice;
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait RawIndexedAccess: Sync + Send {
+pub unsafe trait UnsyncAccess: Sync + Send {
     type Record;
     type RecordMut;
 
@@ -39,21 +39,21 @@ pub unsafe trait RawIndexedAccess: Sync + Send {
     // it off to methods that might eventually try to access the same entries
     unsafe fn clone_access(&self) -> Self;
 
-    unsafe fn get_raw(&self, index: usize) -> Self::Record;
-    unsafe fn get_raw_mut(&self, index: usize) -> Self::RecordMut;
+    unsafe fn get_unsync(&self, index: usize) -> Self::Record;
+    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut;
     fn len(&self) -> usize;
 }
 
-pub trait IntoRawIndexedAccess {
-    type Access: RawIndexedAccess;
+pub trait IntoUnsyncAccess {
+    type Access: UnsyncAccess;
 
-    fn into_raw_indexed_access(self) -> Self::Access;
+    fn into_unsync_access(self) -> Self::Access;
 }
 
-impl<Access: RawIndexedAccess> IntoRawIndexedAccess for Access {
+impl<Access: UnsyncAccess> IntoUnsyncAccess for Access {
     type Access = Self;
 
-    fn into_raw_indexed_access(self) -> Self::Access {
+    fn into_unsync_access(self) -> Self::Access {
         self
     }
 }

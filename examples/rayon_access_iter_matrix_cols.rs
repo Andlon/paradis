@@ -1,20 +1,20 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
 use paradis::rayon::par_iter_from_access;
-use paradis::RawIndexedAccess;
+use paradis::UnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
 
-/// Facilitates (parallel) raw access to columns of a DMatrix
-pub struct DMatrixColRawAccess<'a, T> {
+/// Facilitates (parallel) unsynchronized access to columns of a DMatrix
+pub struct DMatrixColUnsyncAccess<'a, T> {
     ptr: *mut T,
     rows: usize,
     cols: usize,
     marker: PhantomData<&'a T>,
 }
 
-impl<'a, T> DMatrixColRawAccess<'a, T> {
+impl<'a, T> DMatrixColUnsyncAccess<'a, T> {
     pub fn from_matrix_mut(matrix: &'a mut DMatrix<T>) -> Self {
-        DMatrixColRawAccess {
+        DMatrixColUnsyncAccess {
             rows: matrix.nrows(),
             cols: matrix.ncols(),
             marker: Default::default(),
@@ -23,10 +23,10 @@ impl<'a, T> DMatrixColRawAccess<'a, T> {
     }
 }
 
-unsafe impl<'a, T> Send for DMatrixColRawAccess<'a, T> {}
-unsafe impl<'a, T> Sync for DMatrixColRawAccess<'a, T> {}
+unsafe impl<'a, T> Send for DMatrixColUnsyncAccess<'a, T> {}
+unsafe impl<'a, T> Sync for DMatrixColUnsyncAccess<'a, T> {}
 
-unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
+unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
     type Record = DVectorView<'a, T>;
     type RecordMut = DVectorViewMut<'a, T>;
 
@@ -41,7 +41,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
     }
 
     #[inline(always)]
-    unsafe fn get_raw(&self, index: usize) -> Self::Record {
+    unsafe fn get_unsync(&self, index: usize) -> Self::Record {
         let offset = index * self.rows;
         let len = self.rows;
         unsafe {
@@ -51,7 +51,7 @@ unsafe impl<'a, T: Scalar> RawIndexedAccess for DMatrixColRawAccess<'a, T> {
     }
 
     #[inline(always)]
-    unsafe fn get_raw_mut(&self, index: usize) -> Self::RecordMut {
+    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut {
         let offset = index * self.rows;
         let len = self.rows;
         unsafe {
@@ -70,7 +70,7 @@ fn main() {
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
 
-    par_iter_from_access(DMatrixColRawAccess::from_matrix_mut(&mut matrix)).for_each(|mut col| {
+    par_iter_from_access(DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix)).for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
         col *= 2.0;

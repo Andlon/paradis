@@ -1,4 +1,4 @@
-use paradis::{IntoRawIndexedAccess, RawIndexedAccess};
+use paradis::{IntoUnsyncAccess, UnsyncAccess};
 use std::thread::scope;
 
 /// Multiply even numbers by 2, odd numbers by 4 by using separate threads for even and odd numbers.
@@ -6,15 +6,15 @@ fn par_even_odd(numbers: &mut [i32]) {
     let n = numbers.len();
 
     // Since creating an access takes a mutable reference to [i32], we know that we hold
-    // an exclusive raw access to the data, so we can soundly manipulate its data in parallel, provided we are very careful.
-    let access = numbers.into_raw_indexed_access();
+    // an exclusive unsync access to the data, so we can soundly manipulate its data in parallel, provided we are very careful.
+    let access = numbers.into_unsync_access();
 
     scope(|s| {
         // Transform the even numbers
         s.spawn(|| {
             for i in (0..n).step_by(2) {
                 unsafe {
-                    *access.get_raw_mut(i) *= 2;
+                    *access.get_unsync_mut(i) *= 2;
                 }
             }
         });
@@ -22,7 +22,7 @@ fn par_even_odd(numbers: &mut [i32]) {
         s.spawn(|| {
             for i in (1..n).step_by(2) {
                 unsafe {
-                    *access.get_raw_mut(i) *= 4;
+                    *access.get_unsync_mut(i) *= 4;
                 }
             }
         });

@@ -2,7 +2,7 @@
 pub mod rayon;
 
 use std::collections::HashSet;
-pub use paradis_core::{slice, IntoRawIndexedAccess, RawIndexedAccess};
+pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess};
 
 pub unsafe trait DisjointIndices {
     fn get_index(&self, i: usize) -> usize;
