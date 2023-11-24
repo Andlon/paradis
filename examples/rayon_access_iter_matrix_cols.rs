@@ -1,5 +1,5 @@
 use nalgebra::{DMatrix, DVectorView, DVectorViewMut, Dyn, Scalar, U1};
-use paradis::rayon::par_iter_from_access;
+use paradis::rayon::disjoint_indices_par_iter;
 use paradis::UnsyncAccess;
 use rayon::iter::ParallelIterator;
 use std::marker::PhantomData;
@@ -42,6 +42,22 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
 
     #[inline(always)]
     unsafe fn get_unsync(&self, index: usize) -> Self::Record {
+        assert!(index < self.cols, "col index out of bounds");
+        self.get_unsync_unchecked(index)
+    }
+
+    #[inline(always)]
+    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut {
+        assert!(index < self.cols, "col index out of bounds");
+        self.get_unsync_unchecked_mut(index)
+    }
+
+    // fn len(&self) -> usize {
+    //     self.cols
+    // }
+
+    #[inline(always)]
+    unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
         let offset = index * self.rows;
         let len = self.rows;
         unsafe {
@@ -51,7 +67,7 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
     }
 
     #[inline(always)]
-    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut {
+    unsafe fn get_unsync_unchecked_mut(&self, index: usize) -> Self::RecordMut {
         let offset = index * self.rows;
         let len = self.rows;
         unsafe {
@@ -59,18 +75,17 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
             DVectorViewMut::from_slice_generic(slice, Dyn(len), U1)
         }
     }
-
-    fn len(&self) -> usize {
-        self.cols
-    }
 }
 
 fn main() {
     let m = 100;
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
+    let col_access = DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix);
+    let indices = 0 .. n;
 
-    par_iter_from_access(DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix)).for_each(|mut col| {
+    disjoint_indices_par_iter(col_access, indices)
+        .for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
         col *= 2.0;

@@ -26,21 +26,37 @@ unsafe impl<'a, T: Sync + Send> UnsyncAccess for UnsyncSliceAccess<'a, T> {
     }
 
     #[inline(always)]
-    unsafe fn get_unsync(&self, global_index: usize) -> Self::Record {
-        &*self.ptr.add(global_index)
+    unsafe fn get_unsync(&self, index: usize) -> Self::Record {
+        assert!(index < self.len, "index out of bounds");
+        self.get_unsync_unchecked(index)
     }
 
     #[inline(always)]
-    unsafe fn get_unsync_mut(&self, global_index: usize) -> Self::RecordMut {
-        &mut *self.ptr.add(global_index)
+    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut {
+        assert!(index < self.len, "index out of bounds");
+        self.get_unsync_unchecked_mut(index)
     }
 
-    fn len(&self) -> usize {
-        self.len
+    // fn len(&self) -> usize {
+    //     self.len
+    // }
+
+    #[inline(always)]
+    unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
+        &*self.ptr.add(index)
     }
+
+    #[inline(always)]
+    unsafe fn get_unsync_unchecked_mut(&self, index: usize) -> Self::RecordMut {
+        &mut *self.ptr.add(index)
+    }
+
+    // fn is_in_bounds(&self, index: usize) -> bool {
+    //     index < self.len
+    // }
 }
 
-impl<'a, T: Sync + Send> IntoUnsyncAccess for &'a mut [T] {
+impl<'a, T: Sync + Send> IntoUnsyncAccess<usize> for &'a mut [T] {
     type Access = UnsyncSliceAccess<'a, T>;
 
     fn into_unsync_access(self) -> Self::Access {

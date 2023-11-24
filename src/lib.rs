@@ -1,13 +1,26 @@
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
-use std::collections::HashSet;
+use std::{collections::HashSet, ops::Range};
 pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess};
 
-pub unsafe trait DisjointIndices {
-    fn get_index(&self, i: usize) -> usize;
+pub unsafe trait DisjointIndices: Sync + Send {
+    type Index;
+
+    unsafe fn get_unchecked(&self, i: usize) -> Self::Index;
     fn num_indices(&self) -> usize;
-    fn max_index(&self) -> usize;
+}
+
+unsafe impl DisjointIndices for Range<usize> {
+    type Index = usize;
+
+    fn num_indices(&self) -> usize {
+        self.end.saturating_sub(self.start)
+    }
+
+    unsafe fn get_unchecked(&self, i: usize) -> usize {
+        self.start + i
+    }
 }
 
 pub unsafe trait DisjointIndexSubsets {
@@ -21,7 +34,7 @@ pub unsafe trait DisjointIndexSubsets {
 #[derive(Debug, Clone)]
 pub struct DisjointIndicesVec {
     indices: Vec<usize>,
-    max_idx: usize,
+    // max_idx: usize,
 }
 
 #[derive(Debug)]
@@ -40,15 +53,15 @@ impl DisjointIndicesVec {
     where
         I: Iterator<Item=usize>
     {
-        let mut max_idx = 0;
+        // let mut max_idx = 0;
         // TODO: Use faster hash? And/or switch to bitvec for sufficiently large number of indices
         let mut visited_indices = HashSet::new();
 
         let indices = iter
             .map(|idx| {
-                if idx > max_idx {
-                    max_idx = idx;
-                }
+                // if idx > max_idx {
+                //     max_idx = idx;
+                // }
                 if visited_indices.insert(idx) {
                     Ok(idx)
                 } else {
@@ -58,21 +71,19 @@ impl DisjointIndicesVec {
 
         Ok(Self {
             indices,
-            max_idx,
+            // max_idx,
         })
     }
 }
 
 unsafe impl DisjointIndices for DisjointIndicesVec {
-    fn get_index(&self, i: usize) -> usize {
-        self.indices[i]
-    }
+    type Index = usize;
 
     fn num_indices(&self) -> usize {
         self.indices.len()
     }
 
-    fn max_index(&self) -> usize {
-        self.max_idx
+    unsafe fn get_unchecked(&self, i: usize) -> usize {
+        *self.indices.get_unchecked(i)
     }
 }
