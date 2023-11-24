@@ -42,17 +42,41 @@ pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
     // "exclusive access" trait to accommodate this?
     unsafe fn clone_access(&self) -> Self;
 
+    /// Unsynchronized immutable lookup of record.
+    ///
+    /// # Safety
+    ///
+    /// See trait documentation. TODO: Elaborate
+    ///
+    /// # Panics
+    ///
+    /// Implementors must ensure that the method panics if the index is out of bounds.
     unsafe fn get_unsync(&self, index: Index) -> Self::Record;
+
+    /// Unsynchronized mutable lookup of record.
+    ///
+    /// # Safety
+    ///
+    /// See trait documentation. TODO: Elaborate
+    ///
+    /// # Panics
+    ///
+    /// Implementors must ensure that the method panics if the index is out of bounds.
     unsafe fn get_unsync_mut(&self, index: Index) -> Self::RecordMut;
 
+    /// Unsynchronized immutable lookup of record without bounds checks.
+    ///
+    /// # Safety
+    ///
+    /// See trait documentation. TODO: Elaborate
     unsafe fn get_unsync_unchecked(&self, index: Index) -> Self::Record;
+
+    /// Unsynchronized mutable lookup of record without bounds checks.
+    ///
+    /// # Safety
+    ///
+    /// See trait documentation. TODO: Elaborate
     unsafe fn get_unsync_unchecked_mut(&self, index: Index) -> Self::RecordMut;
-
-    // TODO: Rename to shape, can we use the same index type to describe the shape?
-    // TODO: Actually, maybe we should remove len altogether
-    // fn len(&self) -> Index;
-
-    // fn is_in_bounds(&self, index: Index) -> bool;
 }
 
 pub trait IntoUnsyncAccess<Index = usize> {
