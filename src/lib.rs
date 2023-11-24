@@ -1,8 +1,8 @@
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
-use std::{collections::HashSet, ops::Range};
 pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess};
+use std::{collections::HashSet, ops::Range};
 
 pub unsafe trait DisjointIndices: Sync + Send {
     type Index;
@@ -43,7 +43,7 @@ pub struct NotDisjoint;
 impl DisjointIndicesVec {
     pub fn try_from_index_iter<I>(iter: I) -> Result<Self, NotDisjoint>
     where
-        I: IntoIterator<Item=usize>
+        I: IntoIterator<Item = usize>,
     {
         // Remove outer generic call to avoid excessive monomorphization
         Self::try_from_index_iter_inner(iter.into_iter())
@@ -51,7 +51,7 @@ impl DisjointIndicesVec {
 
     fn try_from_index_iter_inner<I>(iter: I) -> Result<Self, NotDisjoint>
     where
-        I: Iterator<Item=usize>
+        I: Iterator<Item = usize>,
     {
         // let mut max_idx = 0;
         // TODO: Use faster hash? And/or switch to bitvec for sufficiently large number of indices
@@ -67,7 +67,8 @@ impl DisjointIndicesVec {
                 } else {
                     Err(NotDisjoint)
                 }
-            }).collect::<Result<Vec<_>, _>>()?;
+            })
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Self {
             indices,

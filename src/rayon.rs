@@ -1,4 +1,4 @@
-use crate::{IntoUnsyncAccess, UnsyncAccess, DisjointIndices};
+use crate::{DisjointIndices, IntoUnsyncAccess, UnsyncAccess};
 use rayon::iter::plumbing::{bridge, Consumer, Producer, ProducerCallback, UnindexedConsumer};
 use rayon::iter::{IndexedParallelIterator, ParallelIterator};
 
@@ -20,7 +20,7 @@ impl<Access, Indices> UnsyncAccessParIter<Access, Indices> {
 
 pub fn disjoint_indices_par_iter<Access, Indices>(
     access: impl IntoUnsyncAccess<Access = Access>,
-    indices: Indices
+    indices: Indices,
 ) -> UnsyncAccessParIter<Access, Indices> {
     UnsyncAccessParIter::from_access_and_indices(access, indices)
 }
@@ -35,7 +35,7 @@ struct AccessProducerMut<'a, Access, Indices> {
 impl<'a, Access, Indices> Iterator for AccessProducerMut<'a, Access, Indices>
 where
     Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices
+    Indices: DisjointIndices,
 {
     type Item = Access::RecordMut;
 
@@ -56,13 +56,14 @@ where
 impl<'a, Access, Indices> ExactSizeIterator for AccessProducerMut<'a, Access, Indices>
 where
     Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices
-{}
+    Indices: DisjointIndices,
+{
+}
 
 impl<'a, Access, Indices> DoubleEndedIterator for AccessProducerMut<'a, Access, Indices>
 where
     Access: UnsyncAccess<Indices::Index>,
-    Indices: DisjointIndices
+    Indices: DisjointIndices,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         // TODO: Need to test this impl
@@ -156,7 +157,7 @@ where
             start_idx: 0,
             end_idx: self.indices.num_indices(),
             access,
-            indices: &self.indices
+            indices: &self.indices,
         })
     }
 }

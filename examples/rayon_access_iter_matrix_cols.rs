@@ -82,10 +82,9 @@ fn main() {
     let n = 1000;
     let mut matrix = DMatrix::repeat(m, n, 2.0);
     let col_access = DMatrixColUnsyncAccess::from_matrix_mut(&mut matrix);
-    let indices = 0 .. n;
+    let indices = 0..n;
 
-    disjoint_indices_par_iter(col_access, indices)
-        .for_each(|mut col| {
+    disjoint_indices_par_iter(col_access, indices).for_each(|mut col| {
         assert_eq!(col.nrows(), m);
         assert_eq!(col.ncols(), 1);
         col *= 2.0;
