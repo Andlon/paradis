@@ -155,7 +155,7 @@ dependencies = [
 
 [[package]]
 name = "paradis"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "nalgebra",
  "paradis-core",
@@ -164,7 +164,7 @@ dependencies = [
 
 [[package]]
 name = "paradis-core"
-version = "0.0.1"
+version = "0.0.3"
 
 [[package]]
 name = "paste"
