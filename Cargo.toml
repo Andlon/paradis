@@ -1,13 +1,17 @@
 [package]
 name = "paradis"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Andlon/paradis"
+description = "Experimental parallel processing of disjoint indices"
 
 [features]
 rayon = [ "dep:rayon" ]
 
 [dependencies]
-paradis-core = { version = "0.1", path = "paradis-core" }
+paradis-core = { version = "0.0.1", path = "paradis-core" }
 rayon = { version = "1.6.1", optional = true }
 
 [[example]]

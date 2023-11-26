@@ -1,3 +1,7 @@
+//! Parallel processing of disjoint indices.
+//!
+//! **VERY EXPERIMENTAL, DO NOT USE**.
+
 #[cfg(feature = "rayon")]
 pub mod rayon;
 
