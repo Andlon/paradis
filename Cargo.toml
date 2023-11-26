@@ -29,3 +29,6 @@ nalgebra = { version = "0.32.1" }
 
 [workspace]
 members = [ "paradis-core" ]
+
+[package.metadata.docs.rs]
+features = [ "rayon" ]
