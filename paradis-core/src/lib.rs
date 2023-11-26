@@ -30,7 +30,7 @@ pub mod slice;
 ///   same index in the collection if either record is mutable.
 ///
 /// TODO: Make the invariants more precise
-pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
+pub unsafe trait UnsyncAccess<Index: Copy = usize>: Sync + Send {
     type Record;
     type RecordMut;
 
@@ -42,6 +42,9 @@ pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
     // "exclusive access" trait to accommodate this?
     unsafe fn clone_access(&self) -> Self;
 
+    /// Determine if the provided index is in bounds.
+    fn in_bounds(&self, index: Index) -> bool;
+
     /// Unsynchronized immutable lookup of record.
     ///
     /// # Safety
@@ -51,7 +54,11 @@ pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
     /// # Panics
     ///
     /// Implementors must ensure that the method panics if the index is out of bounds.
-    unsafe fn get_unsync(&self, index: Index) -> Self::Record;
+    #[inline(always)]
+    unsafe fn get_unsync(&self, index: Index) -> Self::Record {
+        assert!(self.in_bounds(index), "index out of bounds");
+        self.get_unsync_unchecked(index)
+    }
 
     /// Unsynchronized mutable lookup of record.
     ///
@@ -62,7 +69,11 @@ pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
     /// # Panics
     ///
     /// Implementors must ensure that the method panics if the index is out of bounds.
-    unsafe fn get_unsync_mut(&self, index: Index) -> Self::RecordMut;
+    #[inline(always)]
+    unsafe fn get_unsync_mut(&self, index: Index) -> Self::RecordMut {
+        assert!(self.in_bounds(index), "index out of bounds");
+        self.get_unsync_unchecked_mut(index)
+    }
 
     /// Unsynchronized immutable lookup of record without bounds checks.
     ///
@@ -79,13 +90,13 @@ pub unsafe trait UnsyncAccess<Index = usize>: Sync + Send {
     unsafe fn get_unsync_unchecked_mut(&self, index: Index) -> Self::RecordMut;
 }
 
-pub trait IntoUnsyncAccess<Index = usize> {
+pub trait IntoUnsyncAccess<Index: Copy = usize> {
     type Access: UnsyncAccess<Index>;
 
     fn into_unsync_access(self) -> Self::Access;
 }
 
-impl<Index, Access: UnsyncAccess<Index>> IntoUnsyncAccess<Index> for Access {
+impl<Index: Copy, Access: UnsyncAccess<Index>> IntoUnsyncAccess<Index> for Access {
     type Access = Self;
 
     fn into_unsync_access(self) -> Self::Access {

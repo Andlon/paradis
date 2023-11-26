@@ -41,22 +41,6 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
     }
 
     #[inline(always)]
-    unsafe fn get_unsync(&self, index: usize) -> Self::Record {
-        assert!(index < self.cols, "col index out of bounds");
-        self.get_unsync_unchecked(index)
-    }
-
-    #[inline(always)]
-    unsafe fn get_unsync_mut(&self, index: usize) -> Self::RecordMut {
-        assert!(index < self.cols, "col index out of bounds");
-        self.get_unsync_unchecked_mut(index)
-    }
-
-    // fn len(&self) -> usize {
-    //     self.cols
-    // }
-
-    #[inline(always)]
     unsafe fn get_unsync_unchecked(&self, index: usize) -> Self::Record {
         let offset = index * self.rows;
         let len = self.rows;
@@ -74,6 +58,11 @@ unsafe impl<'a, T: Scalar> UnsyncAccess for DMatrixColUnsyncAccess<'a, T> {
             let slice = std::slice::from_raw_parts_mut(self.ptr.add(offset), len);
             DVectorViewMut::from_slice_generic(slice, Dyn(len), U1)
         }
+    }
+
+    #[inline(always)]
+    fn in_bounds(&self, index: usize) -> bool {
+        index < self.cols
     }
 }
 

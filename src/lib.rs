@@ -9,7 +9,7 @@ pub use paradis_core::{slice, IntoUnsyncAccess, UnsyncAccess};
 use std::{collections::HashSet, ops::Range};
 
 pub unsafe trait DisjointIndices: Sync + Send {
-    type Index;
+    type Index: Copy;
 
     unsafe fn get_unchecked(&self, i: usize) -> Self::Index;
     fn num_indices(&self) -> usize;
